@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  database:
+    image: mysql:8.0
+    container_name: mysql-db
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    networks:
+      - myNet
+    ports:
+      - "3306:3306"
+
+  backend:
+    build: ./backend
+    container_name: node-backend
+    networks:
+      - myNet
+    ports:
+      - "3000:3000"
+    depends_on:
+      - database
+    environment:
+      DB_HOST: database
+      DB_USER: user
+      DB_PASSWORD: userpassword
+      DB_NAME: mydatabase
+
+  frontend:
+    build: ./frontend
+    container_name: react-frontend
+    networks:
+      - myNet
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+
+networks:
+  myNet:
+    driver: bridge
