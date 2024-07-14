@@ -20,7 +20,9 @@ RUN npm run build
 RUN npm install -g serve
 
 # Set the command to serve the build directory
-CMD ["serve", "-s", "build"]
+#CMD ["serve", "-s", "build"]
+CMD ["npm", "start"]
+
 
 # Expose port 3000
 EXPOSE 3000
