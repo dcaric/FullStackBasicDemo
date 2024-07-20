@@ -1,24 +1,15 @@
-import logo from './logo.svg';
 import './App.css';
+import React, { useState } from 'react';
+import { Button1 } from './components/buttons/Button1';
+import { Label1 } from './components/labels/Label1';
 
 function App() {
+  const [counter, setCounter] = useState(0);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>Dario 1</p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+      <Button1 key={"button1"} setCounter={setCounter} counter={counter} />
+      <Label1 key={"lable1"} counter={counter} />
     </div>
   );
 }
