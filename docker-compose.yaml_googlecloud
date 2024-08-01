@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    networks:
+      - myNet
+
+  database:
+    image: mysql:8.0
+    container_name: mysql-db
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: user
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+    networks:
+      - myNet
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
+    secrets:
+      - mysql_root_password
+      - mysql_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  backend:
+    image: dcaric/backend:latest
+    container_name: node-backend
+    networks:
+      - myNet
+    expose:
+      - "3000"
+    environment:
+      DB_HOST: database
+      DB_USER: user
+      DB_PASSWORD_FILE: /run/secrets/mysql_password
+      DB_NAME: mydatabase
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    image: dcaric/frontend:latest
+    container_name: react-frontend
+    networks:
+      - myNet
+    expose:
+      - "80"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  myNet:
+    driver: bridge
+
+secrets:
+  mysql_root_password:
+    file: ./secrets/mysql_root_password.txt
+  mysql_password:
+    file: ./secrets/mysql_password.txt
